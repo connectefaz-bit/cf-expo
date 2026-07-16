@@ -1,0 +1,154 @@
+@model CfMvc.Models.ExplorerViewModel
+@using CfMvc.Services
+@{
+    ViewData["Title"] = "CF Explorer (ASP.NET MVC)";
+
+    // Ordinal suffix helper — 1st, 2nd, 3rd, 4th … 11th, 12th, 13th … 21st …
+    string Ordinal(int n)
+    {
+        if (n >= 11 && n <= 13) return $"{n}th";
+        return (n % 10) switch { 1 => $"{n}st", 2 => $"{n}nd", 3 => $"{n}rd", _ => $"{n}th" };
+    }
+}
+
+<div class="cf-app">
+    <header class="cf-header">
+        <div class="cf-header-left">
+            <h1 class="cf-logo">CF_EXPLORER</h1>
+            <form method="get" asp-action="Index" class="cf-handle-form">
+                <input type="text" name="handle" value="@Model.Handle" placeholder="Enter handle..." class="cf-input" autocomplete="off" />
+                <input type="hidden" name="search" value="@Model.Search" />
+                <input type="hidden" name="type" value="@Model.TypeFilter" />
+                <button type="submit" class="cf-btn">LOAD</button>
+            </form>
+        </div>
+        <div class="cf-header-right">
+            @if (Model.Error is not null)
+            {
+                <span class="cf-error">@Model.Error</span>
+            }
+            else if (!string.IsNullOrEmpty(Model.Handle))
+            {
+                <span class="cf-muted">User: <strong>@Model.Handle</strong></span>
+                <span class="cf-solved-badge">@Model.SolvedCount solved</span>
+            }
+        </div>
+    </header>
+
+    @if (!Model.IsDbEmpty && Model.Error is null)
+    {
+        <form method="get" asp-action="Index" class="cf-filter-bar">
+            <input type="hidden" name="handle" value="@Model.Handle" />
+            <input type="text" name="search" value="@Model.Search" placeholder="Search contests..." class="cf-input cf-search" />
+            <div class="cf-type-filters">
+                @foreach (var t in ContestTypeHelper.Filters)
+                {
+                    var active = t == Model.TypeFilter ? "active" : "";
+                    <button type="submit" name="type" value="@t" class="cf-type-btn @active">@t</button>
+                }
+            </div>
+            <span class="cf-count">@Model.Rows.Count @(Model.Rows.Count == 1 ? "contest" : "contests")</span>
+        </form>
+    }
+
+    <main class="cf-main">
+        @if (Model.Error is not null)
+        {
+            <div class="cf-empty cf-empty-error">
+                <p>Failed to load data.</p>
+                <p class="cf-muted">@Model.Error</p>
+            </div>
+        }
+        else if (Model.IsDbEmpty)
+        {
+            <div class="cf-empty">
+                <p>Syncing contest data from Codeforces&hellip;</p>
+                <p class="cf-muted">This takes a few minutes on first run. Refresh the page shortly.</p>
+            </div>
+        }
+        else if (Model.Rows.Count == 0)
+        {
+            <div class="cf-empty">No contests match the current filters.</div>
+        }
+        else
+        {
+            <div class="cf-table-wrap">
+                <table class="cf-table">
+                    <thead>
+                        <tr>
+                            <th class="cf-col-contest">Contest</th>
+                            @for (int col = 1; col <= Model.MaxColumns; col++)
+                            {
+                                <th>#@col</th>
+                            }
+                            @if (Model.HasOverflow)
+                            {
+                                <th class="cf-col-overflow"></th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.Rows)
+                        {
+                            <tr>
+                                <td class="cf-col-contest">@row.Contest.Name</td>
+                                @for (int col = 1; col <= Model.MaxColumns; col++)
+                                {
+                                    if (!row.Cells.TryGetValue(col, out var cell) || cell.Problem is null)
+                                    {
+                                        <td class="cf-cell cf-cell-missing">&mdash;</td>
+                                    }
+                                    else
+                                    {
+                                        var cssClass = cell.Status switch
+                                        {
+                                            CfMvc.Models.CellStatus.Solved    => "cf-cell-solved",
+                                            CfMvc.Models.CellStatus.Unsolved  => "cf-cell-unsolved",
+                                            CfMvc.Models.CellStatus.Available => "cf-cell-available",
+                                            _                                  => "cf-cell-missing"
+                                        };
+                                        var p = cell.Problem;
+                                        <td class="cf-cell @cssClass">
+                                            <a href="@CodeforcesApiService.ProblemUrl(row.Contest.Id, cell.Index!)" target="_blank" rel="noopener noreferrer">
+                                                <span class="cf-cell-index">@cell.Index</span>
+                                                @if (p.Rating.HasValue)
+                                                {
+                                                    <span class="cf-cell-rating">@p.Rating</span>
+                                                }
+                                            </a>
+                                            <div class="cf-tooltip">
+                                                <div class="cf-tooltip-title">@p.Name</div>
+                                                <div class="cf-tooltip-rating">Rating: @(p.Rating.HasValue ? p.Rating.Value.ToString() : "N/A")</div>
+                                                @if (p.Tags.Count > 0)
+                                                {
+                                                    <div class="cf-tooltip-tags">
+                                                        @foreach (var tag in p.Tags)
+                                                        {
+                                                            <span class="cf-tag">@tag</span>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        </td>
+                                    }
+                                }
+                                @if (Model.HasOverflow)
+                                {
+                                    var extra = row.Cells.Keys.Count(k => k > 12);
+                                    if (extra > 0)
+                                    {
+                                        <td class="cf-cell cf-cell-overflow"><span>+@extra</span></td>
+                                    }
+                                    else
+                                    {
+                                        <td class="cf-cell cf-cell-missing"></td>
+                                    }
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </main>
+</div>

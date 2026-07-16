@@ -1,0 +1,442 @@
+:root {
+    --bg: #0a0a0c;
+    --bg-elevated: #101014;
+    --card: #131317;
+    --border: #232329;
+    --border-soft: #1c1c22;
+    --fg: #f2f2f4;
+    --muted: #8b8b97;
+    --muted-2: #5c5c68;
+    --primary: #3d8bff;
+    --primary-dim: rgba(61, 139, 255, 0.12);
+    --solved-bg: rgba(34, 197, 94, 0.14);
+    --solved-fg: #4ade80;
+    --unsolved-bg: rgba(248, 113, 113, 0.10);
+    --unsolved-fg: #f87171;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+    background: radial-gradient(circle at 20% 0%, rgba(61, 139, 255, 0.07), transparent 45%), var(--bg);
+    color: var(--fg);
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+}
+
+.cf-mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+.cf-app { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ---------- Header ---------- */
+
+.cf-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1.5rem;
+    background: rgba(16, 16, 20, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+}
+
+.cf-header-left { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+
+.cf-logo {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cf-logo::before {
+    content: "";
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 12px var(--primary);
+}
+
+.cf-handle-form { display: flex; gap: 0.5rem; }
+
+.cf-input {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    padding: 0.5rem 0.8rem;
+    border-radius: var(--radius);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.cf-input::placeholder { color: var(--muted-2); }
+
+.cf-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-dim);
+}
+
+.cf-btn {
+    background: var(--primary);
+    color: #04101f;
+    border: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: var(--radius);
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.1s;
+}
+
+.cf-btn:hover { filter: brightness(1.1); }
+.cf-btn:active { transform: translateY(1px); }
+
+.cf-header-right { display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem; }
+
+.cf-muted { color: var(--muted); }
+
+.cf-error {
+    color: var(--unsolved-fg);
+    background: var(--unsolved-bg);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--radius);
+    font-size: 0.8rem;
+}
+
+.cf-solved-badge {
+    background: var(--solved-bg);
+    color: var(--solved-fg);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.8rem;
+}
+
+/* ---------- Filter bar ---------- */
+
+.cf-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1.5rem;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+}
+
+.cf-search { width: 18rem; }
+
+.cf-type-filters { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+.cf-type-btn {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-family: "Inter", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.cf-type-btn:hover { border-color: var(--muted-2); color: var(--fg); }
+
+.cf-type-btn.active {
+    background: var(--primary-dim);
+    color: var(--primary);
+    border-color: rgba(61, 139, 255, 0.4);
+}
+
+.cf-count {
+    margin-left: auto;
+    color: var(--muted-2);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+/* ---------- Table ---------- */
+
+.cf-main { flex: 1; overflow: auto; padding: 1.5rem; }
+
+.cf-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 55vh;
+    color: var(--muted);
+    font-size: 1rem;
+    text-align: center;
+    padding: 1rem;
+}
+
+.cf-empty-error { color: var(--unsolved-fg); }
+
+.cf-table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+.cf-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+
+.cf-table thead th {
+    position: sticky;
+    top: 0;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border);
+    padding: 0.65rem 0.5rem;
+    text-align: center;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+}
+
+.cf-col-contest {
+    text-align: left !important;
+    min-width: 20rem;
+    max-width: 28rem;
+    padding-left: 1.1rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--fg);
+    font-weight: 500;
+}
+
+.cf-table tbody tr { transition: background 0.1s; }
+.cf-table tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.012); }
+.cf-table tbody tr:hover { background: rgba(61, 139, 255, 0.05); }
+
+.cf-table td {
+    border-bottom: 1px solid var(--border-soft);
+    padding: 0.4rem;
+    text-align: center;
+    font-family: "JetBrains Mono", monospace;
+}
+
+.cf-cell { width: 5.5rem; padding: 0 !important; }
+
+.cf-cell-missing { color: var(--muted-2); }
+
+.cf-cell-solved, .cf-cell-unsolved {
+    position: relative;
+    border-left: 1px solid rgba(0, 0, 0, 0.25);
+    border-right: 1px solid rgba(0, 0, 0, 0.25);
+    transition: filter 0.15s ease, background 0.15s ease;
+}
+
+.cf-cell-solved { background: var(--solved-bg); }
+.cf-cell-unsolved { background: var(--unsolved-bg); }
+
+.cf-cell-solved:hover, .cf-cell-unsolved:hover { filter: brightness(1.22); }
+
+.cf-cell-solved a, .cf-cell-unsolved a {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.3rem;
+    width: 100%;
+    height: 100%;
+    min-height: 3rem;
+    padding: 0.5rem 0.3rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.cf-cell-index {
+    font-weight: 700;
+    font-size: 0.82rem;
+    line-height: 1;
+}
+
+.cf-cell-rating {
+    font-size: 0.66rem;
+    line-height: 1;
+    opacity: 0.85;
+    font-weight: 500;
+}
+
+.cf-cell-solved a {
+    color: var(--solved-fg);
+}
+
+.cf-cell-unsolved a {
+    color: var(--unsolved-fg);
+}
+
+/* ---------- Custom instant tooltip (no native title, no delay) ---------- */
+
+/* In-cell tooltip element is a hidden data template; JS reads it and
+   renders a position:fixed overlay so no scroll container can clip it. */
+.cf-tooltip {
+    display: none;
+}
+
+/* ---- Floating overlay (position:fixed, injected into <body> by site.js) ---- */
+#cf-floating-tip {
+    position: fixed;
+    display: none;
+    z-index: 9999;
+    pointer-events: none;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    padding: 0.55rem 0.7rem;
+    width: max-content;
+    max-width: 220px;
+    font-family: "Inter", sans-serif;
+    text-align: left;
+    white-space: normal;
+    opacity: 0;
+    transition: opacity 0.08s ease;
+}
+
+/* Arrow — separate fixed element so it can sit between tip and cell */
+#cf-floating-tip-arrow {
+    position: fixed;
+    display: none;
+    z-index: 10000;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    transition: opacity 0.08s ease;
+    /* default: tip is ABOVE cell — arrow points DOWN */
+    border: 7px solid transparent;
+    border-top-color: var(--bg-elevated);
+    transform: translate(-50%, 0);
+}
+
+    /* tip is BELOW cell — arrow points UP */
+    #cf-floating-tip-arrow.cf-arrow-down {
+        border-top-color: transparent;
+        border-bottom-color: var(--bg-elevated);
+        transform: translate(-50%, -100%);
+    }
+
+.cf-tooltip-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--fg);
+    line-height: 1.25;
+    margin-bottom: 0.3rem;
+}
+
+.cf-tooltip-rating {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+}
+
+.cf-tooltip-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+.cf-tag {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--muted);
+    font-size: 0.6rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+}
+
+/* ---------- Overflow "+N" indicator ---------- */
+
+.cf-col-overflow { width: 2.4rem; }
+
+.cf-cell-overflow {
+    width: 2.4rem;
+    vertical-align: middle;
+}
+
+.cf-cell-overflow span {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.12rem 0.42rem;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+/* ---------- Available (no-handle neutral) ---------- */
+
+.cf-cell-available {
+    background: rgba(255, 255, 255, 0.04);
+    position: relative;
+    border-left: 1px solid rgba(0, 0, 0, 0.2);
+    border-right: 1px solid rgba(0, 0, 0, 0.2);
+    transition: filter 0.15s ease, background 0.15s ease;
+}
+
+.cf-cell-available:hover { filter: brightness(1.25); }
+
+.cf-cell-available a {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.3rem;
+    width: 100%;
+    height: 100%;
+    min-height: 2.4rem;
+    padding: 0.5rem 0.3rem;
+    text-decoration: none;
+    cursor: pointer;
+    color: var(--muted);
+}
+
+.cf-cell-available:hover .cf-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ---------- Scrollbar ---------- */
+
+.cf-main::-webkit-scrollbar { width: 10px; height: 10px; }
+.cf-main::-webkit-scrollbar-track { background: transparent; }
+.cf-main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+.cf-main::-webkit-scrollbar-thumb:hover { background: var(--muted-2); }
