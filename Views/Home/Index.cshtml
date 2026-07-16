@@ -14,7 +14,9 @@
 <div class="cf-app">
     <header class="cf-header">
         <div class="cf-header-left">
-            <h1 class="cf-logo">CF_EXPLORER</h1>
+            <a asp-controller="Home" asp-action="Index" class="cf-logo-link">
+                <h1 class="cf-logo">CF_EXPLORER</h1>
+            </a>
             <form method="get" asp-action="Index" class="cf-handle-form">
                 <input type="text" name="handle" value="@Model.Handle" placeholder="Enter handle..." class="cf-input" autocomplete="off" />
                 <input type="hidden" name="search" value="@Model.Search" />
