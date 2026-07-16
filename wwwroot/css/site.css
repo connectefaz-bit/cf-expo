@@ -73,6 +73,17 @@ body {
     box-shadow: 0 0 12px var(--primary);
 }
 
+.cf-logo-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+}
+
+.cf-logo-link:hover {
+    text-decoration: none;
+    color: inherit;
+}
+
 .cf-handle-form { display: flex; gap: 0.5rem; }
 
 .cf-input {
