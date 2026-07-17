@@ -3,12 +3,15 @@
 @{
     ViewData["Title"] = "CF Explorer (ASP.NET MVC)";
 
-    // Ordinal suffix helper — 1st, 2nd, 3rd, 4th … 11th, 12th, 13th … 21st …
-    string Ordinal(int n)
-    {
-        if (n >= 11 && n <= 13) return $"{n}th";
-        return (n % 10) switch { 1 => $"{n}st", 2 => $"{n}nd", 3 => $"{n}rd", _ => $"{n}th" };
-    }
+    // Build a URL with all current params, overriding the ones specified.
+    string PageUrl(int p, int ps) =>
+        $"/?handle={Uri.EscapeDataString(Model.Handle ?? "")}" +
+        $"&search={Uri.EscapeDataString(Model.Search)}" +
+        $"&type={Uri.EscapeDataString(Model.TypeFilter)}" +
+        $"&page={p}&pageSize={ps}";
+
+    int startRow = (Model.Page - 1) * Model.PageSize + 1;
+    int endRow   = Math.Min(Model.Page * Model.PageSize, Model.TotalRows);
 }
 
 <div class="cf-app">
@@ -21,6 +24,7 @@
                 <input type="text" name="handle" value="@Model.Handle" placeholder="Enter handle..." class="cf-input" autocomplete="off" />
                 <input type="hidden" name="search" value="@Model.Search" />
                 <input type="hidden" name="type" value="@Model.TypeFilter" />
+                <input type="hidden" name="pageSize" value="@Model.PageSize" />
                 <button type="submit" class="cf-btn">LOAD</button>
             </form>
         </div>
@@ -49,7 +53,7 @@
                     <button type="submit" name="type" value="@t" class="cf-type-btn @active">@t</button>
                 }
             </div>
-            <span class="cf-count">@Model.Rows.Count @(Model.Rows.Count == 1 ? "contest" : "contests")</span>
+            <span class="cf-count">@Model.TotalRows @(Model.TotalRows == 1 ? "contest" : "contests")</span>
         </form>
     }
 
@@ -68,7 +72,7 @@
                 <p class="cf-muted">This takes a few minutes on first run. Refresh the page shortly.</p>
             </div>
         }
-        else if (Model.Rows.Count == 0)
+        else if (Model.TotalRows == 0)
         {
             <div class="cf-empty">No contests match the current filters.</div>
         }
@@ -149,8 +153,82 @@
                             </tr>
                         }
                     </tbody>
-                </table>
+                                </table>
+            </div>
+
+            @* ── Pagination bar ──────────────────────────────────────────────── *@
+            <div class="cf-pagination">
+                <div class="cf-pagination-info">
+                    Showing @startRow–@endRow of @Model.TotalRows contests
+                </div>
+
+                <div class="cf-pagination-controls">
+                    @* Previous *@
+                    @if (Model.Page > 1)
+                    {
+                        <a class="cf-page-btn" href="@PageUrl(Model.Page - 1, Model.PageSize)">&#8592;</a>
+                    }
+                    else
+                    {
+                        <span class="cf-page-btn cf-page-btn--disabled">&#8592;</span>
+                    }
+
+                    @* Page number pills — show a window around current page *@
+                    @{
+                        int window = 2;
+                        int pStart = Math.Max(1, Model.Page - window);
+                        int pEnd   = Math.Min(Model.TotalPages, Model.Page + window);
+                    }
+                    @if (pStart > 1)
+                    {
+                        <a class="cf-page-btn" href="@PageUrl(1, Model.PageSize)">1</a>
+                        @if (pStart > 2) { <span class="cf-page-ellipsis">…</span> }
+                    }
+                    @for (int p = pStart; p <= pEnd; p++)
+                    {
+                        if (p == Model.Page)
+                        {
+                            <span class="cf-page-btn cf-page-btn--active">@p</span>
+                        }
+                        else
+                        {
+                            <a class="cf-page-btn" href="@PageUrl(p, Model.PageSize)">@p</a>
+                        }
+                    }
+                    @if (pEnd < Model.TotalPages)
+                    {
+                        @if (pEnd < Model.TotalPages - 1) { <span class="cf-page-ellipsis">…</span> }
+                        <a class="cf-page-btn" href="@PageUrl(Model.TotalPages, Model.PageSize)">@Model.TotalPages</a>
+                    }
+
+                    @* Next *@
+                    @if (Model.Page < Model.TotalPages)
+                    {
+                        <a class="cf-page-btn" href="@PageUrl(Model.Page + 1, Model.PageSize)">&#8594;</a>
+                    }
+                    else
+                    {
+                        <span class="cf-page-btn cf-page-btn--disabled">&#8594;</span>
+                    }
+                </div>
+
+                @* Page-size selector *@
+                <div class="cf-page-size">
+                    <span class="cf-muted">Per page:</span>
+                    @foreach (var ps in ExplorerViewModel.PageSizeOptions)
+                    {
+                        if (ps == Model.PageSize)
+                        {
+                            <span class="cf-page-btn cf-page-btn--active">@ps</span>
+                        }
+                        else
+                        {
+                            <a class="cf-page-btn" href="@PageUrl(1, ps)">@ps</a>
+                        }
+                    }
+                </div>
             </div>
         }
     </main>
 </div>
+
