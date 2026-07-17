@@ -445,6 +445,78 @@ body {
     transform: translateX(-50%) translateY(0);
 }
 
+/* ---------- Pagination ---------- */
+
+.cf-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.9rem 0.25rem 0.25rem;
+    font-size: 0.8rem;
+}
+
+.cf-pagination-info {
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.cf-pagination-controls,
+.cf-page-size {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+}
+
+.cf-page-size {
+    gap: 0.35rem;
+}
+
+.cf-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 0.45rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--fg);
+    font-size: 0.78rem;
+    font-family: "Inter", sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease;
+    user-select: none;
+}
+
+a.cf-page-btn:hover {
+    background: var(--bg-elevated);
+    border-color: var(--muted-2);
+}
+
+.cf-page-btn--active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    cursor: default;
+}
+
+.cf-page-btn--disabled {
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
+}
+
+.cf-page-ellipsis {
+    color: var(--muted);
+    padding: 0 0.2rem;
+    line-height: 2rem;
+}
+
 /* ---------- Scrollbar ---------- */
 
 .cf-main::-webkit-scrollbar { width: 10px; height: 10px; }
