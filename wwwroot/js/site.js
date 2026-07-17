@@ -1,3 +1,26 @@
+// Clean GET forms — strip inputs that equal their default value before submit
+// so the browser never appends e.g. ?search=&type=All&page=1&pageSize=50.
+(function () {
+    var DEFAULTS = { type: 'All', search: '', pageSize: '50', page: '1', handle: '' };
+
+    document.addEventListener('submit', function (e) {
+        var form = e.target;
+        if (!form.classList.contains('cf-clean-form')) return;
+
+        // For each named control, disable it if its value equals the default.
+        // Disabled fields are excluded from the GET query string.
+        Array.prototype.forEach.call(form.elements, function (el) {
+            if (!el.name || el.disabled) return;
+            var def = DEFAULTS[el.name];
+            if (def !== undefined && el.value === def) {
+                el.disabled = true;
+                // Re-enable after navigation so the form is usable if the user
+                // hits back (browser restores state but controls stay disabled).
+                setTimeout(function () { el.disabled = false; }, 500);
+            }
+        });
+    });
+}());
 // Floating tooltip — rendered as position:fixed so it is never clipped by
 // any overflow:auto scroll container (the table wrapper, the sidebar, etc.)
 // One shared overlay div is created once and reused for every cell hover.
