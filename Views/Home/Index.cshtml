@@ -3,12 +3,22 @@
 @{
     ViewData["Title"] = "CF Explorer (ASP.NET MVC)";
 
-    // Build a URL with all current params, overriding the ones specified.
-    string PageUrl(int p, int ps) =>
-        $"/?handle={Uri.EscapeDataString(Model.Handle ?? "")}" +
-        $"&search={Uri.EscapeDataString(Model.Search)}" +
-        $"&type={Uri.EscapeDataString(Model.TypeFilter)}" +
-        $"&page={p}&pageSize={ps}";
+    // Build a clean URL — omit params that equal their defaults so the
+    // address bar stays readable (no handle=&search=&type=All&page=1&pageSize=50).
+    string PageUrl(int p, int ps)
+    {
+        var qs = new System.Text.StringBuilder("/?");
+        void Add(string k, string v) {
+            if (qs.Length > 2) qs.Append('&');
+            qs.Append(k).Append('=').Append(Uri.EscapeDataString(v));
+        }
+        if (!string.IsNullOrEmpty(Model.Handle))   Add("handle",   Model.Handle!);
+        if (!string.IsNullOrEmpty(Model.Search))   Add("search",   Model.Search);
+        if (Model.TypeFilter != "All")             Add("type",     Model.TypeFilter);
+        if (p  > 1)                                Add("page",     p.ToString());
+        if (ps != 50)                              Add("pageSize", ps.ToString());
+        return qs.Length == 2 ? "/" : qs.ToString();
+    }
 
     int startRow = (Model.Page - 1) * Model.PageSize + 1;
     int endRow   = Math.Min(Model.Page * Model.PageSize, Model.TotalRows);
@@ -20,11 +30,11 @@
             <a asp-controller="Home" asp-action="Index" class="cf-logo-link">
                 <h1 class="cf-logo">CF_EXPLORER</h1>
             </a>
-            <form method="get" asp-action="Index" class="cf-handle-form">
+            <form method="get" asp-action="Index" class="cf-handle-form cf-clean-form">
                 <input type="text" name="handle" value="@Model.Handle" placeholder="Enter handle..." class="cf-input" autocomplete="off" />
-                <input type="hidden" name="search" value="@Model.Search" />
-                <input type="hidden" name="type" value="@Model.TypeFilter" />
-                <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                @if (!string.IsNullOrEmpty(Model.Search))   { <input type="hidden" name="search"   value="@Model.Search" /> }
+                @if (Model.TypeFilter != "All")             { <input type="hidden" name="type"     value="@Model.TypeFilter" /> }
+                @if (Model.PageSize   != 50)                { <input type="hidden" name="pageSize" value="@Model.PageSize" /> }
                 <button type="submit" class="cf-btn">LOAD</button>
             </form>
         </div>
@@ -43,8 +53,9 @@
 
     @if (!Model.IsDbEmpty && Model.Error is null)
     {
-        <form method="get" asp-action="Index" class="cf-filter-bar">
-            <input type="hidden" name="handle" value="@Model.Handle" />
+            <form method="get" asp-action="Index" class="cf-filter-bar cf-clean-form">
+            @if (!string.IsNullOrEmpty(Model.Handle)) { <input type="hidden" name="handle"   value="@Model.Handle" /> }
+            @if (Model.PageSize != 50)                { <input type="hidden" name="pageSize" value="@Model.PageSize" /> }
             <input type="text" name="search" value="@Model.Search" placeholder="Search contests..." class="cf-input cf-search" />
             <div class="cf-type-filters">
                 @foreach (var t in ContestTypeHelper.Filters)
