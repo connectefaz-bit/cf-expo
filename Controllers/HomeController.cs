@@ -38,15 +38,22 @@ public class HomeController : Controller
     /// Response is output-cached per unique (handle, search, type) combination for 5 minutes,
     /// reducing DB load and render time on repeated page loads.
     /// </summary>
-    [OutputCache(Duration = 300, VaryByQueryKeys = ["handle", "search", "type"])]
+    [OutputCache(Duration = 300, VaryByQueryKeys = ["handle", "search", "type", "page", "pageSize"])]
     [HttpGet("/")]
-    public async Task<IActionResult> Index(string? handle, string search = "", string type = "All")
+    public async Task<IActionResult> Index(string? handle, string search = "", string type = "All",
+                                           int page = 1, int pageSize = 50)
     {
+        // Clamp pageSize to allowed options; default 50.
+        if (!ExplorerViewModel.PageSizeOptions.Contains(pageSize)) pageSize = 50;
+        page = Math.Max(1, page);
+
         var model = new ExplorerViewModel
         {
             Handle = handle,
             Search = search,
             TypeFilter = type,
+            Page = page,
+            PageSize = pageSize,
         };
 
         try
@@ -86,15 +93,26 @@ public class HomeController : Controller
 
             var rows = TableBuilder.BuildTable(problems, contests, solved, noHandle, overrides);
 
-            model.Rows = rows
+            var filtered = rows
                 .Where(r => ContestTypeHelper.Matches(r.Contest.Name, type))
                 .Where(r => string.IsNullOrEmpty(search)
                          || r.Contest.Name.Contains(search, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
+            model.TotalRows = filtered.Count;
+            // Clamp page to valid range after we know total.
+            model.Page = Math.Min(page, Math.Max(1, model.TotalPages));
+
+            model.Rows = filtered
+                .Skip((model.Page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
             const int ColCap = 12;
-            var rawMax = model.Rows.Count > 0
-                ? model.Rows.Max(r => r.Cells.Count > 0 ? r.Cells.Keys.Max() : 0)
+            // MaxColumns / HasOverflow are based on the full filtered set so
+            // column count stays stable while paging.
+            var rawMax = filtered.Count > 0
+                ? filtered.Max(r => r.Cells.Count > 0 ? r.Cells.Keys.Max() : 0)
                 : 0;
             model.MaxColumns  = Math.Min(rawMax, ColCap);
             model.HasOverflow = rawMax > ColCap;
