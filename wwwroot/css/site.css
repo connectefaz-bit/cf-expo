@@ -125,6 +125,15 @@ body {
 
 .cf-muted { color: var(--muted); }
 
+.cf-handle-error {
+    font-size: 0.8rem;
+    color: #f0a050;
+    background: rgba(240, 160, 80, 0.1);
+    border: 1px solid rgba(240, 160, 80, 0.3);
+    border-radius: 6px;
+    padding: 0.3rem 0.7rem;
+}
+
 .cf-error {
     color: var(--unsolved-fg);
     background: var(--unsolved-bg);
