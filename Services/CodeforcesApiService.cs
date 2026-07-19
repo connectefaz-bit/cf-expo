@@ -55,11 +55,32 @@ public class CodeforcesApiService
     /// All submissions ever made by a handle. The controller caches this result with a 30-minute TTL.
     /// Only user.status is called for handle lookups — all other data comes from the database.
     /// </summary>
+        /// Throws <see cref="HandleNotFoundException"/> when the handle does not exist on Codeforces.
+    /// </summary>
     public async Task<List<CfSubmission>> FetchUserSubmissionsAsync(string handle)
     {
         var trimmed = handle.Trim();
         if (trimmed.Length == 0) return new List<CfSubmission>();
-        return await FetchAsync<List<CfSubmission>>($"/user.status?handle={Uri.EscapeDataString(trimmed)}");
+
+        // Call the API manually so we can distinguish a 400 "handle not found"
+        // from other HTTP errors before calling EnsureSuccessStatusCode.
+        var url = $"{CfApiBase}/user.status?handle={Uri.EscapeDataString(trimmed)}";
+        using var response = await _http.GetAsync(url);
+
+        if ((int)response.StatusCode == 400)
+            throw new HandleNotFoundException(trimmed);
+
+        response.EnsureSuccessStatusCode();
+
+        var body = await response.Content.ReadAsStringAsync();
+        var envelope = JsonSerializer.Deserialize<CfApiResponse<List<CfSubmission>>>(body, JsonOptions)
+            ?? throw new InvalidOperationException("Codeforces API returned an empty response.");
+
+        // CF sometimes returns status=FAILED with comment even on 200.
+        if (envelope.Status != "OK" || envelope.Result is null)
+            throw new HandleNotFoundException(trimmed);
+
+        return envelope.Result;
     }
 
     /// <summary>
