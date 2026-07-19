@@ -40,8 +40,12 @@
         </div>
         <div class="cf-header-right">
             @if (Model.Error is not null)
-            {
+                        {
                 <span class="cf-error">@Model.Error</span>
+            }
+            else if (Model.HandleError is not null)
+            {
+                <span class="cf-handle-error">&#9888; @Model.HandleError</span>
             }
             else if (!string.IsNullOrEmpty(Model.Handle))
             {
