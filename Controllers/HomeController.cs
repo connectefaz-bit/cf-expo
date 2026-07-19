@@ -71,16 +71,26 @@ public class HomeController : Controller
                 var trimmed = handle!.Trim();
                 model.Handle = trimmed;
 
-                // Cache user.status results for 30 minutes to reduce API calls.
-                var cacheKey = $"solved:{trimmed.ToLowerInvariant()}";
-                if (!_cache.TryGetValue(cacheKey, out List<CfSubmission>? submissions) || submissions is null)
+                                try
                 {
-                    submissions = await _api.FetchUserSubmissionsAsync(trimmed);
-                    _cache.Set(cacheKey, submissions, TimeSpan.FromMinutes(30));
-                }
+                    // Cache user.status results for 30 minutes to reduce API calls.
+                    var cacheKey = $"solved:{trimmed.ToLowerInvariant()}";
+                    if (!_cache.TryGetValue(cacheKey, out List<CfSubmission>? submissions) || submissions is null)
+                    {
+                        submissions = await _api.FetchUserSubmissionsAsync(trimmed);
+                        _cache.Set(cacheKey, submissions, TimeSpan.FromMinutes(30));
+                    }
 
-                solved = TableBuilder.BuildSolvedSet(submissions);
-                model.SolvedCount = solved.Count;
+                    solved = TableBuilder.BuildSolvedSet(submissions);
+                    model.SolvedCount = solved.Count;
+                }
+                catch (HandleNotFoundException ex)
+                {
+                    // Non-fatal: show a friendly message in the header but still
+                    // render the full contest table in no-handle (neutral) mode.
+                    model.HandleError = ex.Message;
+                    noHandle = true;
+                }
             }
 
             // Apply in-memory enrichment overrides for split-round contests.
