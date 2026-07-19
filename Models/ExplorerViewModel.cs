@@ -5,7 +5,10 @@ public class ExplorerViewModel
     public string? Handle { get; set; }
     public string Search { get; set; } = "";
     public string TypeFilter { get; set; } = "All";
+        /// <summary>Fatal error — hides the entire table (DB failure, etc.).</summary>
     public string? Error { get; set; }
+    /// <summary>Non-fatal handle error — shown in the header; table still renders in no-handle mode.</summary>
+    public string? HandleError { get; set; }
     public int SolvedCount { get; set; }
     public List<TableRow> Rows { get; set; } = new();
     /// <summary>Maximum problem position across all displayed rows — drives the number of columns rendered.</summary>
